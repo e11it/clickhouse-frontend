@@ -49,7 +49,15 @@ window.global_delimiter             = ";;";
         const SQL_SAVE_LIVEAUTO_KEY = 'liveAutocompletion';
         const SQL_SESSION_KEY = 'sessionData';
         const SQL_LOG_LENGTH = 30;
-
+        $scope.menuOptions = [
+            ['Select', function ($itemScope, $event, modelValue, text, $li) {
+                $scope.selected = $itemScope.item.name;
+            }],
+            null, // Dividier
+            ['Remove', function ($itemScope, $event, modelValue, text, $li) {
+                $scope.items.splice($itemScope.$index, 1);
+            }]
+        ];
         $scope.vars = {
             sqlHistory: localStorageService.get(SQL_HISTORY_KEY) || [],
             dictionaries: [],
@@ -1022,6 +1030,25 @@ window.global_delimiter             = ";;";
             $window.onbeforeunload = null;
         });
 
+
+        //context menu array
+        $scope.rightAceMenuList = [
+            {active: true, value: 'AutoFormat'},
+            {active: true, value: 'Cut'},
+            {active: true, value: 'Paste'}
+        ];
+
+        //gets triggered when an item in the context menu is selected
+        $scope.rightMenuProcess = function(item, ev){
+            if(item.value == "Copy"){
+                $scope.placeHolder = $scope.model.text; //copy text
+            } else if(item.value == "Cut"){
+                $scope.placeHolder = $scope.model.text; //cut text
+                $scope.model.text = "";
+            } else {
+                $scope.model.text += $scope.placeHolder; //paste text
+            }
+        };
 
 
 

@@ -48,12 +48,19 @@
 - [x]  Live autocomplete delay
 - [x]  Редактор:Сворачивать скобки / Подзапросы
 - [x]  Редактор:Выбор разделителя запросов `;;` или `;` 
+- [x]  Комманда DRAW подсветка
+- [x]  Отправка запросов post
+- [x]  Сворачивать _все_ скобки 
+
 
 **Todo high**:
 - [ ] Редактор 
 > - Парсинг в тексте FROM DBName.TBName,список доступных полей исходя из имени таблиц
 > - Переформатирование запросов/автоформат
  
+- [ ] Контекстное меню у редактора
+
+
 - [ ] Переменные 
 > - Подстановка в запросах $var переменных 
 > - Таблица редактор
@@ -73,23 +80,30 @@ http://krispo.github.io/angular-nvd3/#/
 - [ ] Kill query in SHOW PROCESSLIST
 
 
+
+
+**Todo low**:
+- [ ] tableau export via WDC/ODATA
+
 - [ ] Ошибка ``Не введен SQL`` 
+
 - [ ] Ошибка позиции `;;\n
                       select 2\n
                       ;;<cursor>\n
                       select 4\n` в коде `item.range.compare(cursor.row, cursor.column) !== 0)`
-
-**Todo low**:
-- [ ] tableau export via WDC/ODATA
  
 
 
 ----
-*angular-nvd3*
+*Построение графи.*
+sankeys in Tableau: https://community.tableau.com/thread/154623
 
-https://github.com/krispo/angular-nvd3/
+http://echarts.baidu.com/demo.html#sankey-product
 
-https://github.com/krispo/angular-nvd3/blob/gh-pages/pages/gridster/dashboard.html
+http://echarts.baidu.com/demo.html#treemap-drill-down
+
+http://echarts.baidu.com/examples.html
+
 
 
 **ACE**
