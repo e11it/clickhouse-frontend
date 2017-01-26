@@ -43,24 +43,25 @@
 - [x]  Редактор ACEjs,вынести из под Bower
 - [x]  Редактор - иконки в подсказках
 - [x]  Отдельное окно SHOW PROCESSLIST FORMAT JSON
-- [x]  ACE скрестить с Ace.Tern
-- [x]  Подсказки из офф документации в виде JSON 
-- [x]  Live autocomplete delay
+- [x]  Подсказки из офф документации в виде Json/js 
 - [x]  Редактор:Сворачивать скобки / Подзапросы
 - [x]  Редактор:Выбор разделителя запросов `;;` или `;` 
 - [x]  Комманда DRAW подсветка
 - [x]  Отправка запросов post
 - [x]  Сворачивать _все_ скобки 
+- [x]  Переформатирование запросов/автоформат
+- [x]  Контекстное меню у редактора, свернуть все/развернуть
+- [x]  [Command|Ctrl+Shift+Plus | Command|Ctrl+Shift+Minus ] - свернуть все/развернуть
+- [x]  [Command|Ctrl+Shift+F ] - Format code
+
+
+
 
 
 **Todo high**:
 - [ ] Редактор 
 > - Парсинг в тексте FROM DBName.TBName,список доступных полей исходя из имени таблиц
-> - Переформатирование запросов/автоформат
  
-- [ ] Контекстное меню у редактора
-
-
 - [ ] Переменные 
 > - Подстановка в запросах $var переменных 
 > - Таблица редактор
@@ -74,17 +75,15 @@
 http://krispo.github.io/angular-nvd3/#/
 
 - [ ] Улучшить отображение полей таблицы в дереве, поддержка клика , доп элементы у таблицы - меню по правому клику
-
 - [ ] Help Modal Window -> Link to github +  Hotkey справочник и/или help 
-
 - [ ] Kill query in SHOW PROCESSLIST
 
-
-
+- [ ]  echarts тема темная 
+- [ ]  ACE скрестить с Ace.Tern
+- [ ]  Live autocomplete delay
 
 **Todo low**:
 - [ ] tableau export via WDC/ODATA
-
 - [ ] Ошибка ``Не введен SQL`` 
 
 - [ ] Ошибка позиции `;;\n
@@ -135,6 +134,30 @@ ui-grid.info : http://ui-grid.info/docs/#/tutorial/401_AllFeatures
 
 
 http://raw.densitydesign.org/
+
+
+
+# Draw 
+
+### drawchart
+
+```javascript
+{
+    cos:{'lineColor':'green','type':'column'},
+    sin:{'title':'COS!!!!'}
+}
+```
+### drawsankeys
+
+```javascript
+{
+    levels:[
+        {source:'AdmArea',target:'District',value:'MoneyPerHour'},
+        {source:'District',target:'Street',value:'MoneyPerHour'}
+    ],
+    echarts:{}
+}
+```
 
 ----
 

@@ -50,11 +50,11 @@ window.global_delimiter             = ";;";
         const SQL_SESSION_KEY = 'sessionData';
         const SQL_LOG_LENGTH = 30;
         $scope.menuOptions = [
-            ['Select', function ($itemScope, $event, modelValue, text, $li) {
+            ['Select', function ($itemScope) {
                 $scope.selected = $itemScope.item.name;
             }],
             null, // Dividier
-            ['Remove', function ($itemScope, $event, modelValue, text, $li) {
+            ['Remove', function ($itemScope) {
                 $scope.items.splice($itemScope.$index, 1);
             }]
         ];
@@ -183,7 +183,7 @@ window.global_delimiter             = ";;";
 
                 let r = data;
 
-                if (typeof data !== 'object') {
+                if (!angular.isObject(data)) {
                     data = {
                         data: r,
                         meta: null,
@@ -240,11 +240,20 @@ window.global_delimiter             = ";;";
          * @returns {*}
          */
         $scope.renderResult = (data) => {
+
+            // ставим активной закладку 0
+
+            data.echarts=false;
+            data.pivot=false;
+            data.charts=false;
+
+            data.selectedTabIndex=0;
+            //
             if (typeof data.error == 'string') {
                 data.result = '<pre class="fs-caption tc-red-700">' + data.error + '</pre>';
             }
-            else if (typeof data.data !== 'object') {
-                if (typeof data.data !== 'string') {
+            else if (!angular.isObject(data.data)) {
+                if (!angular.isString(data.data)) {
                     data.result = '<pre class="fs-caption">' + angular.toJson(data.data, true) + '</pre>';
                 }
                 else {
@@ -252,8 +261,14 @@ window.global_delimiter             = ";;";
                 }
             }
             else {
+
+                // рендер таблицы в HTML
                 data.result = API.dataToHtml(data);
+                // запрос на createtable из select
                 data.createtable = API.dataToCreateTable(data);
+
+                data.pivot=true;
+                data.charts=true;
             }
             return data;
         };
@@ -283,8 +298,7 @@ window.global_delimiter             = ";;";
          */
         $scope.execute = (type, tab) => {
 
-
-            let sql = tab.sql;
+            let sql = tab.sql === '' ? tab.editor.getValue() : tab.sql;
             let numquery = 0;
             const editor = tab.editor;
             let queue = [];
@@ -379,9 +393,9 @@ window.global_delimiter             = ";;";
                         subSql=draw[0]['sql'];
                         draw.forEach((i)=>{
 
-                            if (!angular.isUndefined(i.keyword) && i.keyword)
+                            if (angular.isDefined(i.keyword) && i.keyword)
                             {
-                                let d=/DRAW\s+(\w+)/img;
+                                let d=/DRAW(\w+)/img;
                                 let found=d.exec(i.keyword);
                                 if (found && found[1])
                                 {
@@ -582,6 +596,17 @@ window.global_delimiter             = ";;";
             }
         };
 
+        const formatCode = () => {
+            if (angular.isObject(window.sqlFormatter)) {
+                $timeout(() => {
+                    //$scope.vars.currentTab.sql = window.sqlFormatter.format($scope.vars.currentTab.sql);
+                    $scope.vars.currentTab.editor.setValue(
+                        window.sqlFormatter.format($scope.vars.currentTab.sql)
+                    );
+                });
+            }
+        };
+
         for (let i = 0; i < 9; i++) {
             hotkeys.add({
                 combo: 'ctrl+shift+' + (i + 1),
@@ -595,6 +620,10 @@ window.global_delimiter             = ";;";
         hotkeys.add({
             combo: 'ctrl+left',
             callback: selectPrevTab
+        });
+        hotkeys.add({
+            combo: 'ctrl+shift+f',
+            callback: formatCode
         });
 
         /**
@@ -616,8 +645,8 @@ window.global_delimiter             = ";;";
                 //showInvisibles:true ,
                 showGutter:true ,
                 enableLiveAutocompletion:$scope.vars.enableLiveAutocompletion,
-                liveAutocompletionDelay: 500,
-                liveAutocompletionThreshold: 1
+                // liveAutocompletionDelay: 500,
+                // liveAutocompletionThreshold: 1
             });
             editor.setTheme('ace/theme/' + $scope.vars.theme);
 
@@ -650,6 +679,30 @@ window.global_delimiter             = ";;";
                         editor.removeLines();
                     }
              });
+            // removeLines
+            editor.commands.addCommand({
+                    name: 'collapseAll',
+                    bindKey: {
+                        win: 'Ctrl-Shift--',
+                        mac: 'Command+Shift+-'
+                    },
+                    exec: (editor) => {
+                        console.info('collapseAll');
+                        editor.session.$mode.collapseAll(editor.session);
+                    }
+             });
+            editor.commands.addCommand({
+                    name: 'unfold',
+                    bindKey: {
+                        win: 'Ctrl-Shift-+',
+                        mac: 'Command+Shift+='
+                    },
+                    exec: (editor) => {
+                        editor.session.unfold();
+
+                    }
+             });
+            // https://github.com/ajaxorg/ace/blob/master/lib/ace/lib/keys.js
 
             editor.commands.addCommand({
                 name: 'runAllCommand',
@@ -687,6 +740,14 @@ window.global_delimiter             = ";;";
                     mac: 'Command-Left'
                 },
                 exec: selectPrevTab
+            });
+            editor.commands.addCommand({
+                name: 'formatcode',
+                bindKey: {
+                    win: 'Ctrl-Shift-F',
+                    mac: 'Command-Shift-F'
+                },
+                exec: formatCode
             });
 
             editor.clearSelection();
@@ -729,7 +790,7 @@ window.global_delimiter             = ";;";
             }
 
 
-            localStorageService.set('delimiter', d)
+            localStorageService.set('delimiter', d);
             window.global_delimiter=d;
 
 
@@ -923,16 +984,12 @@ window.global_delimiter             = ";;";
             }
         });
 
-        $scope.$watch('vars.enableLiveAutocompletion', (value, old) => {
+        $scope.$watch('vars.enableLiveAutocompletion', (value) => {
             localStorageService.set(SQL_SAVE_LIVEAUTO_KEY, value);
             // loop
             $scope.vars.tabs.forEach((tab) => tab.editor && tab.editor.setOptions({
                 enableLiveAutocompletion: value
             }));
-
-
-
-
         });
 
         /**
@@ -1033,25 +1090,32 @@ window.global_delimiter             = ";;";
 
         //context menu array
         $scope.rightAceMenuList = [
-            {active: true, value: 'AutoFormat'},
-            {active: true, value: 'Cut'},
-            {active: true, value: 'Paste'}
+            {active: true, value: 'AutoFormat',icon:'format-size'},
+            {active: true, value: 'Expand',icon:'arrow-expand'},
+            {active: true, value: 'Collapse',icon:'arrow-compress'},
+            {active: true, value: 'Collapse All',icon:'arrow-compress'},
         ];
 
         //gets triggered when an item in the context menu is selected
-        $scope.rightMenuProcess = function(item, ev){
-            if(item.value == "Copy"){
-                $scope.placeHolder = $scope.model.text; //copy text
-            } else if(item.value == "Cut"){
-                $scope.placeHolder = $scope.model.text; //cut text
-                $scope.model.text = "";
+        $scope.rightMenuProcess = function(item){
+
+            let session=$scope.vars.currentTab.editor.session;
+
+            $scope.vars.currentTab.editor.resize();
+            if(item.value == "AutoFormat"){
+                formatCode();
+            } else if(item.value == "Expand"){
+                session.unfold();
+            } else if(item.value == "Collapse All"){
+                session.$mode.collapseAll(session);
+            } else if(item.value == "Collapse"){
+                session.foldAll();
             } else {
-                $scope.model.text += $scope.placeHolder; //paste text
+
             }
+            $scope.vars.currentTab.editor.focus();
+
         };
-
-
-
 
     }
 })(angular, smi2);

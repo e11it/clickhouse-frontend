@@ -1,6 +1,4 @@
-let define = window.define || window.ace.define;
-
-define("ace/mode/matching_brace_outdent",["require","exports","module","ace/range"], function(require, exports, module) {
+ace.define("ace/mode/matching_brace_outdent",["require","exports","module","ace/range"], function(require, exports, module) {
     "use strict";
 
     var Range = require("ace/range").Range;
@@ -41,7 +39,7 @@ define("ace/mode/matching_brace_outdent",["require","exports","module","ace/rang
 });
 
 
-define("ace/mode/clickhouse_FoldMode", ["$rootScope", "require", "exports", "module", "ace/lib/oop",
+ace.define("ace/mode/clickhouse_FoldMode", ["$rootScope", "require", "exports", "module", "ace/lib/oop",
     "ace/range",'ace/mode/sqlserver','ace/mode/folding/cstyle'], function (require, exports, module) {
 
 
@@ -82,22 +80,13 @@ define("ace/mode/clickhouse_FoldMode", ["$rootScope", "require", "exports", "mod
                 let pos = iterator.getCurrentTokenPosition();
                 token = iterator.stepForward();
                 // если текущий токен скобка а следующий текст и далее SELECT
-                if (t.type=='paren.lparen' && ( t.value=='(' || t.value=='{') )// && token.type
+                if
+                (
+                 (t.type=='paren.lparen' && ( t.value=='(' ||  t.value=='{' ) )
+
+                )
                 {
                    range=session.getBracketRange(pos);
-                    //
-                    //
-                    // if (token.type=='keyword' && token.value=='SELECT')
-                    // {
-                    //     range=session.getBracketRange(pos);
-                    // }
-                    // else
-                    // {
-                    //     if  (token.type=='text' && token2.type=='keyword' && token2.value=='SELECT')
-                    //     {
-                    //         range=session.getBracketRange(pos);
-                    //     }
-                    // }
                 }
                 // Если мы нашли рендж - отлично
                 if (range) break;
@@ -106,4 +95,3 @@ define("ace/mode/clickhouse_FoldMode", ["$rootScope", "require", "exports", "mod
         };
     }).call(FoldMode.prototype);
 });
-

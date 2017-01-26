@@ -1,5 +1,4 @@
-
-define("ace/mode/clickhouse_highlight_rules", [ "require", "exports", "$rootScope", "module", "ace/lib/oop", "ace/snippets", 'ace/ext/language_tools' ,"ace/mode/text_highlight_rules"], function (require, exports,$rootScope) {
+ace.define("ace/mode/clickhouse_highlight_rules", [ "require", "exports", "$rootScope", "module", "ace/lib/oop", "ace/snippets", 'ace/ext/language_tools' ,"ace/mode/text_highlight_rules"], function (require, exports,$rootScope) {
     "use strict";
 
     let oop = require("../lib/oop");
@@ -48,7 +47,7 @@ define("ace/mode/clickhouse_highlight_rules", [ "require", "exports", "$rootScop
         else{
             delit=new RegExp(';;');
         }
-        let drawCommand="DRAW\\W+AREA|DRAW\\W+BAR|DRAW\\W+HEATMAP|DRAW\\W+HISTOGRAM|DRAW\\W+LINE|DRAW\\W+POINT|DRAW\\W+PIVOT";
+        let drawCommand="DRAWHEATMAP|DRAWCHART|DRAWPIVOT|DRAWSANKEYS|DRAWTREEMAP";
 
         let keywordMapper = this.createKeywordMapper({
             "support.function": builtinFunctions,
@@ -106,10 +105,10 @@ define("ace/mode/clickhouse_highlight_rules", [ "require", "exports", "$rootScop
                     regex: "\\+|\\-|\\/|\\/\\/|%|<@>|@>|<@|&|\\^|~|<|>|<=|=>|==|!=|<>|="
                 }, {
                     token: "paren.lparen",
-                    regex: "[\\(]"
+                    regex: "[\\(\\{]"
                 }, {
                     token: "paren.rparen",
-                    regex: "[\\)]"
+                    regex: "[\\)\\}]"
                 }, {
                     token: "text",
                     regex: "\\s+"
@@ -185,7 +184,7 @@ define("ace/mode/clickhouse_highlight_rules", [ "require", "exports", "$rootScop
 
         addCompletions(keywords.split('|'), 'keyword','keyword');
         addCompletions("GROUP BY|ORDER BY|FORMAT JSON|FORMAT JSONCompact|FORMAT JSONEachRow|FORMAT TSKV|FORMAT TabSeparated|FORMAT TabSeparatedWithNames|FORMAT TabSeparatedWithNamesAndTypes|FORMAT TabSeparatedRaw|FORMAT BlockTabSeparated|FORMAT CSV|FORMAT CSVWithNames".split('|'), 'keyword','keyword');
-        addCompletions("DRAW AREA|DRAW BAR|DRAW HEATMAP|DRAW HISTOGRAM|DRAW LINE|DRAW POINT|DRAW PIVOT".split('|'), 'draw','draw');
+        addCompletions(drawCommand.split('|'), 'draw','draw');
         addCompletions(dataTypes.split('|'), 'type','type');
         addCompletions(window.global_keywords_tables.split('|'), '[table]','table');
 

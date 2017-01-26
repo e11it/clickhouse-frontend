@@ -1,4 +1,4 @@
-((angular, smi2) => {
+((angular, smi2, AmCharts, $) => {
     'use strict';
 
     angular.module(smi2.app.name).controller('FooterCtrl', FooterController);
@@ -31,6 +31,20 @@
 
 
         $scope.amChartOptions = false;
+
+
+        $scope.ready = {
+            pivot:false,
+            amchart:false,
+            echarts:false
+
+        };
+        $scope.echarts = {
+            sankeys:false
+        };
+
+
+
         $scope.vars = {
             rsw: 0,
             uiTheme: ThemeService.themeObject,
@@ -45,12 +59,7 @@
 
             let rows=[];
             let cols=[];
-            meta.forEach((i) => {
-                // rows.push(i.name);
-                // cols.push(i.name);
-
-            });
-            $("#pivotDiv").pivotUI(data, {
+            angular.element("#pivotDiv").pivotUI(data, {
                 dataClass: $.pivotUtilities.SubtotalPivotData,
                 rows: rows,
                 cols: cols,
@@ -60,22 +69,109 @@
                     collapseColsAt: 0
                 }
             });
-
+            $scope.ready.pivot=true;
         };
 
-        $scope.initChart = (meta,data,query) => {
+        $scope.initSankeys = (meta,data,query) => {
 
             let drawCommand=[];
+            if ('drawCommand' in query)
+            {
+                drawCommand=query.drawCommand;
+            }
+            let levels=[];
+            drawCommand.forEach(i => {
+                try {
+                    if (i && !i.code) return;
+                    let object=eval('('+i.code+')');
+                    console.warn(object);
+                    levels=object['levels'];
 
+                    // получаем настройки по осям
+                } catch (E) {
+                    console.error('error eval ', i.code);
+                }
+            });
+
+
+            // подготовка данных
+            let nodes=[];
+            let links=[];
+            console.warn('levels',levels);
+            levels.forEach(level=>{
+                if (level.source && level.target && level.value) {
+
+                    data.forEach(row=>{
+                        nodes[row[level.source]]=1;
+                        nodes[row[level.target]]=1;
+
+                        links.push({
+                            source:row[level.source],
+                            target:row[level.target],
+                            value:row[level.value]
+                        })
+
+                    });
+                }
+            });
+            let result_nodes=[];
+            for (let key in nodes) {
+                   result_nodes.push({name:key});
+            }
+            let option = {
+                tooltip: {
+                    trigger: 'item',
+                    triggerOn: 'mousemove'
+
+                },
+                series: [
+                    {
+                        type: 'sankey',
+                        layout:'none',
+                        data: result_nodes,
+                        links: links,
+                        itemStyle: {
+                            normal: {
+                                borderWidth: 1,
+                                borderColor: '#aaa'
+                            }
+                        },
+                        lineStyle: {
+                            normal: {
+                                curveness: 0.5
+                            }
+                        }
+                    }
+                ]
+            };
+
+            //
+            //
+            console.info(option);
+            // let dom = document.getElementById('sunkeyDiv');
+            // let myChart = echarts.init(dom);
+
+            $scope.echarts.sankeys=option;
+            // myChart.setOption(option);
+            //
+            // $.get('./product.json', function (data) {
+            //
+            //
+            //
+            // });
+            $scope.ready.echarts=true;
+
+        };
+        $scope.initChart = (meta,data,query) => {
+            let drawCommand=[];
             if ('drawCommand' in query)
             {
                 drawCommand=query.drawCommand;
             }
             $scope.createChart(meta,data,drawCommand);
-
-
-
+            $scope.ready.amchart=true;
         };
+
         $scope.getChartGraph = (meta,chartSets) => {
 
             // SELECT number,sin(number),cos(number),number as `Title [asix=g2:column:blue]`  from system.numbers limit 40
@@ -106,7 +202,7 @@
                     "useLineColorForBulletBorder": true,
                     "valueField": name,
                     "type": "smoothedLine",
-                    "balloonText": "[[title]] [[category]]<br><b><span style='font-size:14px;'>[[value]]</span></b>",
+                    "balloonText": "[[title]] [[category]]<br><b><span style='font-size:14px;'>[[value]]</span></b>"
                 };
 
                 if (!chartSets) chartSets={};
@@ -120,7 +216,7 @@
             // ['DROP', 'CREATE', 'ALTER'].indexOf(  item.query.keyword.toUpperCase()  ) != -1
 
             let chartSets={};
-            drawCommand.forEach((i)=>{
+            drawCommand.forEach(i => {
                 try {
                     if (i && !i.code) return;
                     let object=eval('('+i.code+')');
@@ -134,9 +230,8 @@
                             chartSets[i.name]=object[i.name];
                         }
                     });
-
-                }catch (E) {
-
+                } catch (E) {
+                    console.error('error eval ', i.code);
                 }
             });
 
@@ -193,6 +288,7 @@
             }
             //this all works:
             let obl={
+                "color": ThemeService.isDark() ? '#eee' : '#333',
                 "type": "serial",
                 "theme": theme,
                 "marginRight": 50,
@@ -212,10 +308,9 @@
                     "axisAlpha": 1,
                     // "stackType": "100%",// "stackType": "regular",
                     "gridAlpha": 0.07,
-
-                    // "axisColor": "#FF6600",
+                    "axisColor": ThemeService.isDark() ? '#eee' : '#333',
+                    "gridColor": ThemeService.isDark() ? '#eee' : '#333',
                     // "axisThickness": 2,
-
                     // "position": "left",
                     "ignoreAxisWidth": true
                 } ],
@@ -257,7 +352,9 @@
                 },
                 "categoryAxis": {
                     "dashLength": 1,
-                    "minorGridEnabled": true
+                    "minorGridEnabled": true,
+                    "axisColor": ThemeService.isDark() ? '#eee' : '#333',
+                    "gridColor": ThemeService.isDark() ? '#eee' : '#333'
                 },
                 "dataProvider": data,
                 "legend": {
@@ -267,7 +364,7 @@
                     "valueAlign": "left",
                     "valueText": "[[value]] ([[percents]]%)",
                     "valueWidth": 100
-                },
+                }
             };
 
 
@@ -290,7 +387,7 @@
                         "axisThickness": 1,
                         "position": "right",
                         "ignoreAxisWidth": true,
-                        "offset": 1*a_offset,
+                        "offset": 1 * a_offset
                     };
                     obl.valueAxes.push(ax);
                 });
@@ -301,8 +398,8 @@
 
             console.info('valueAxes',obl.valueAxes);
 
-            let chart = AmCharts.makeChart("myFirstChart", obl);
-        }
+            AmCharts.makeChart("myFirstChart", obl);
+        };
 
     }
-})(angular, smi2);
+})(angular, smi2, window.AmCharts, window.$);
